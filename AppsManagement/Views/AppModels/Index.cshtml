@@ -13,6 +13,9 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.AppId)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
             <th>
@@ -28,6 +31,9 @@
 @foreach (var item in Model) {
         <tr>
             <td>
+                @Html.DisplayFor(modelItem => item.AppId)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
@@ -38,8 +44,8 @@
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.AppId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AppId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.AppId">Delete</a>
+                <a asp-action="Details" asp-route-id="@item.AppId">Details</a> @*|*@
+                @*<a asp-action="Delete" asp-route-id="@item.AppId">Delete</a>*@
             </td>
         </tr>
 }

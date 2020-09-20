@@ -1,28 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AppsManagement.Data;
 using AppsManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using AppsManagement.Services;
 
 namespace AppsManagement
 {
+    [Authorize]
     public class AppModelsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext context;
+        private readonly IOneSignalApiService oneSignalApiService;
 
-        public AppModelsController(ApplicationDbContext context)
+        public AppModelsController(ApplicationDbContext context, IOneSignalApiService oneSignalApiService)
         {
-            _context = context;
+            this.context = context;
+            this.oneSignalApiService = oneSignalApiService;
         }
 
         // GET: AppModels
+        [Authorize(Roles = "apps.admin, apps.data-entry-operator")]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Apps.ToListAsync());
+            var apiResults = await oneSignalApiService.GetAllAsync();
+            return View(apiResults);
+            // results can be stored from local db or api
+            //return View(await context.Apps.ToListAsync());
         }
 
         // GET: AppModels/Details/5
@@ -33,8 +39,11 @@ namespace AppsManagement
                 return NotFound();
             }
 
-            var appModel = await _context.Apps
-                .FirstOrDefaultAsync(m => m.AppId == id);
+            // app can be retrieve locally or from api
+            var appModel = await oneSignalApiService.GetAsync(id);
+
+            //var appModel = await context.Apps
+            //    .FirstOrDefaultAsync(m => m.AppId == id);
             if (appModel == null)
             {
                 return NotFound();
@@ -54,14 +63,14 @@ namespace AppsManagement
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AppId,Name,OrganizationId,ChromeWebOrigin")] AppModel appModel)
+        public async Task<IActionResult> Create([Bind("Name,OrganizationId,ChromeWebOrigin")] AppModel appModel)
         {
             if (ModelState.IsValid)
             {
+                var app = await oneSignalApiService.CreateApp(appModel);
 
-
-                _context.Add(appModel);
-                await _context.SaveChangesAsync();
+                context.Add(app);
+                await context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(appModel);
@@ -75,7 +84,7 @@ namespace AppsManagement
                 return NotFound();
             }
 
-            var appModel = await _context.Apps.FindAsync(id);
+            var appModel = await context.Apps.FindAsync(id);
             if (appModel == null)
             {
                 return NotFound();
@@ -99,8 +108,10 @@ namespace AppsManagement
             {
                 try
                 {
-                    _context.Update(appModel);
-                    await _context.SaveChangesAsync();
+                    var app = await oneSignalApiService.UpdateApp(appModel);
+
+                    context.Update(app);
+                    await context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -118,38 +129,11 @@ namespace AppsManagement
             return View(appModel);
         }
 
-        // GET: AppModels/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var appModel = await _context.Apps
-                .FirstOrDefaultAsync(m => m.AppId == id);
-            if (appModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(appModel);
-        }
-
-        // POST: AppModels/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            var appModel = await _context.Apps.FindAsync(id);
-            _context.Apps.Remove(appModel);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
         private bool AppModelExists(string id)
         {
-            return _context.Apps.Any(e => e.AppId == id);
+            return context.Apps.Any(e => e.AppId == id);
         }
     }
 }
