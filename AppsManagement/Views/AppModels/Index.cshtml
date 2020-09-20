@@ -5,10 +5,12 @@
 }
 
 <h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@if (ViewContext.HttpContext.User.IsInRole("apps.admin"))
+{
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
 <table class="table">
     <thead>
         <tr>
@@ -28,26 +30,30 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrganizationId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ChromeWebOrigin)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.AppId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AppId">Details</a> @*|*@
-                @*<a asp-action="Delete" asp-route-id="@item.AppId">Delete</a>*@
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AppId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrganizationId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ChromeWebOrigin)
+                </td>
+                <td>
+                    @if (ViewContext.HttpContext.User.IsInRole("apps.admin"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.AppId">Edit</a><span> |</span>
+                    }
+                    <a asp-action="Details" asp-route-id="@item.AppId">Details</a> @*|*@
+                    @*<a asp-action="Delete" asp-route-id="@item.AppId">Delete</a>*@
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

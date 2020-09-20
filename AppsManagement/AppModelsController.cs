@@ -32,6 +32,7 @@ namespace AppsManagement
         }
 
         // GET: AppModels/Details/5
+        [Authorize(Roles = "apps.admin, apps.data-entry-operator")]
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -53,6 +54,7 @@ namespace AppsManagement
         }
 
         // GET: AppModels/Create
+        [Authorize(Roles = "apps.admin")]
         public IActionResult Create()
         {
             return View();
@@ -63,6 +65,7 @@ namespace AppsManagement
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "apps.admin")]
         public async Task<IActionResult> Create([Bind("Name,OrganizationId,ChromeWebOrigin")] AppModel appModel)
         {
             if (ModelState.IsValid)
@@ -77,6 +80,7 @@ namespace AppsManagement
         }
 
         // GET: AppModels/Edit/5
+        [Authorize(Roles = "apps.admin")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -97,6 +101,7 @@ namespace AppsManagement
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "apps.admin")]
         public async Task<IActionResult> Edit(string id, [Bind("AppId,Name,OrganizationId,ChromeWebOrigin")] AppModel appModel)
         {
             if (id != appModel.AppId)
